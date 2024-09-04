@@ -19,8 +19,8 @@ class Article:
 
     @title.setter
     def title(self, value):
-        pass
-        
+        raise AttributeError("can't set attribute")
+
 class Author:
     def __init__(self, name):
         if not isinstance(name, str) or len(name) == 0:
@@ -33,7 +33,7 @@ class Author:
     
     @name.setter
     def name(self, value):
-        pass 
+        raise AttributeError("can't set attribute")
 
     def articles(self):
         return [article for article in Article.all if article.author == self]
@@ -49,11 +49,12 @@ class Author:
         return topics if topics else None
 
 class Magazine:
+    all = []
+
     def __init__(self, name, category):
-        self._name = ""
-        self._category = ""
         self.name = name
         self.category = category
+        Magazine.all.append(self)
 
     @property
     def name(self):
@@ -61,8 +62,9 @@ class Magazine:
 
     @name.setter
     def name(self, value):
-        if self._is_valid_name(value):
-            self._name = value
+        if not isinstance(value, str) or not (2 <= len(value) <= 16):
+            raise ValueError("Name must be a string between 2 and 16 characters.")
+        self._name = value
 
     @property
     def category(self):
@@ -70,16 +72,9 @@ class Magazine:
 
     @category.setter
     def category(self, value):
-        if self._is_valid_category(value):
-            self._category = value
-
-    @staticmethod
-    def _is_valid_name(name):
-        return isinstance(name, str) and 2 <= len(name) <= 16
-
-    @staticmethod
-    def _is_valid_category(category):
-        return isinstance(category, str) and len(category) > 0
+        if not isinstance(value, str) or len(value) == 0:
+            raise ValueError("Category must be a non-empty string.")
+        self._category = value
 
     def articles(self):
         return [article for article in Article.all if article.magazine == self]
@@ -94,3 +89,9 @@ class Magazine:
     def contributing_authors(self):
         return [author for author in self.contributors() 
                 if len([article for article in self.articles() if article.author == author]) > 2] or None
+
+    @classmethod
+    def top_publisher(cls):
+        if not Article.all:
+            return None
+        return max(cls.all, key=lambda magazine: len(magazine.articles()), default=None)
