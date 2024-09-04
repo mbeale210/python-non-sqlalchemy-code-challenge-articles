@@ -2,6 +2,10 @@ class Article:
     all = []
 
     def __init__(self, author, magazine, title):
+        if not isinstance(author, Author):
+            raise ValueError("Author must be an instance of Author class.")
+        if not isinstance(magazine, Magazine):
+            raise ValueError("Magazine must be an instance of Magazine class.")
         if not isinstance(title, str) or not (5 <= len(title) <= 50):
             raise ValueError("Title must be a string between 5 and 50 characters.")
         self._title = title
@@ -49,25 +53,33 @@ class Magazine:
         self._name = ""
         self._category = ""
         self.name = name
-        self._category = category
+        self.category = category
 
     @property
     def name(self):
         return self._name
-    
+
     @name.setter
     def name(self, value):
-        if isinstance(value, str) and 2 <= len(value) <= 16:
+        if self._is_valid_name(value):
             self._name = value
 
     @property
     def category(self):
         return self._category
-    
+
     @category.setter
     def category(self, value):
-        if isinstance(value, str) and len(value) > 0:
+        if self._is_valid_category(value):
             self._category = value
+
+    @staticmethod
+    def _is_valid_name(name):
+        return isinstance(name, str) and 2 <= len(name) <= 16
+
+    @staticmethod
+    def _is_valid_category(category):
+        return isinstance(category, str) and len(category) > 0
 
     def articles(self):
         return [article for article in Article.all if article.magazine == self]
@@ -80,5 +92,5 @@ class Magazine:
         return titles if titles else None
 
     def contributing_authors(self):
-        authors = [author for author in self.contributors() if len([article for article in self.articles() if article.author == author]) > 2]
-        return authors if authors else None
+        return [author for author in self.contributors() 
+                if len([article for article in self.articles() if article.author == author]) > 2] or None
