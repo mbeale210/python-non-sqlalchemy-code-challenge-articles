@@ -76,6 +76,12 @@ class Magazine:
             raise ValueError("Category must be a non-empty string.")
         self._category = value
 
+    @classmethod
+    def top_publisher(cls):
+        if not Article.all:
+            return None
+        return max(cls.all, key=lambda magazine: len(magazine.articles()), default=None)
+
     def articles(self):
         return [article for article in Article.all if article.magazine == self]
 
@@ -89,9 +95,3 @@ class Magazine:
     def contributing_authors(self):
         return [author for author in self.contributors() 
                 if len([article for article in self.articles() if article.author == author]) > 2] or None
-
-    @classmethod
-    def top_publisher(cls):
-        if not Article.all:
-            return None
-        return max(cls.all, key=lambda magazine: len(magazine.articles()), default=None)
